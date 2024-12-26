@@ -1,0 +1,29 @@
+services:
+  app:
+    build: .
+    image: wts-device-manager:${APP_VERSION:-latest}
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - APP_VERSION=${APP_VERSION:-latest}
+      - VITE_JWT_SECRET=${JWT_SECRET}
+      - VITE_ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - VITE_CHECKOUT_PASSWORD=${CHECKOUT_PASSWORD}
+    volumes:
+      - db-data:/app/data
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    labels:
+      - "version=${APP_VERSION:-latest}"
+      - "deployment.timestamp=${DEPLOY_TIMESTAMP:-0}"
+
+volumes:
+  db-data:
+    name: wts-device-manager-db
